@@ -4,7 +4,7 @@ from machine import Pin
 status_light = Pin("LED", Pin.OUT)
 
 # Blink Pi Pico light to indicate certain statuses
-def(blinks):
+def send_blinks(blinks):
     count = 1
 
     for count in range(1, blinks):
