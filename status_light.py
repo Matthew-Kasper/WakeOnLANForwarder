@@ -5,9 +5,10 @@ status_light = Pin("LED", Pin.OUT)
 
 # Blink Pi Pico light to indicate certain statuses
 def send_blinks(blinks):
-    count = 1
+    count = 0
 
-    for count in range(1, blinks):
+    for count in range(0, blinks):
         status_light.on()
-        utime.sleep_ms(5)
+        utime.sleep_ms(75)
         status_light.off()
+        utime.sleep_ms(75)
