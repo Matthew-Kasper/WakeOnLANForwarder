@@ -2,7 +2,6 @@ import os
 
 import uping
 
-
 def get_target_ip():
     # Open credentials.csv that stores target_ip information
     credentials = open("credentials.txt", "r")
@@ -16,11 +15,8 @@ def get_target_ip():
 def get_status(ip):
     response = uping.ping(ip, count=2, timeout=500, quiet=True)
 
-    # Return on if all packets arrived successfully
-    if(response[0] == response[1]):
-        return "on"
-    else:
-        return "off"
+    # Return true if all packets arrived successfully
+    return response[0] == response[1]
 
 def wake(ip):
 
