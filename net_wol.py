@@ -3,19 +3,17 @@ import socket
 import network
 import utime
 
+import credentials_cache
 import device_manager
 import status_light
 
 
 # Connects to local network, returns IPv4 of device
 def connect():
-    # Open credentials.csv that stores network information
-    credentials = open("credentials.txt", "r")
-    lines = credentials.readlines()
 
     # Takes first and second line of credentials file and takes the ssid and password from them
-    ssid = lines[0].strip()
-    password = lines[1].strip()
+    ssid = credentials_cache.get_ssid()
+    password = credentials_cache.get_inet_password()
 
     # Connect to the network using ssid and password
     wlan = network.WLAN(network.STA_IF)
@@ -29,7 +27,7 @@ def page(is_enabled, runtime):
 
     if(runtime == -1):
         # Do not display runtime
-        status = "off"
+        status = str(is_enabled)
     else:
         # Display runtime
         formatted_time = utime.localtime(runtime)
@@ -66,8 +64,14 @@ def listen(ip):
 
     return(connection)
 
+# Creates broadcast socket to be used for sending wake-on-lan packets
+def establish_wol_socket():
+    wol_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    return wol_socket
+
 # Checks if an html form button was pressed and updates the html page
-def serve(connection, target_ip):
+def serve(connection, target_ip, wol_socket):
 
     # Initialize system timer variables
     first_enable = True
@@ -87,9 +91,9 @@ def serve(connection, target_ip):
 
         # Check for what button was pressed and if the server can be turned on/off
         if request == '/On?' and not device_manager.get_status(target_ip):
-            device_manager.wake(target_ip)
+            device_manager.wake(wol_socket)
         elif request == '/Off?' and device_manager.get_status(target_ip):
-            device_manager.kill(target_ip)
+            device_manager.kill("stub")
 
         # Generate and send new html page
         if device_manager.get_status(target_ip):
