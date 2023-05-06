@@ -87,6 +87,8 @@ def serve(connection, target_ip, wol_socket):
                         # If button Off was pressed
                         device_manager.kill("Stub")
                         send_status = "Successfully sent Kill-On-Lan packet to device."
+                    else:
+                        send_status = "Can not wake/kill when device is already in that state."
                 else:
                     send_status = "Incorrect Password."
         except IndexError:
