@@ -24,28 +24,17 @@ def connect():
 
     return str(wlan.ifconfig()[0])
 
-def page(is_enabled):
-    html = f"""
-            <!DOCTYPE html>
-            <html>
-            <body>
-            <h2>Wake on LAN Forwarder.</h2>
-            <form action="./On">
-            <input type="submit" value="On " />
-            </form>
-            <form action="./Off">
-            <input type="submit" value="Off" />
-            </form>
-            <p>Device is currently {str(is_enabled)}.</p>
-            </body>
-            </html>
-            """
-
-    return html
-
 # Generates html page to be sent.
 def page(is_enabled, runtime):
-    formatted_time = utime.localtime(runtime)
+
+    if(runtime == -1):
+        # Do not display runtime
+        status = "off"
+    else:
+        # Display runtime
+        formatted_time = utime.localtime(runtime)
+        status = f"{str(is_enabled)} for {int(formatted_time[3])} hours, {int(formatted_time[4])} minutes, and {int(formatted_time[5])} seconds."
+
 
     html = f"""
             <!DOCTYPE html>
@@ -53,13 +42,12 @@ def page(is_enabled, runtime):
             <body>
             <h2>Wake on LAN Forwarder.</h2>
             <form action="./On">
-            <input type="submit" value="On " />
+            <input type="submit" value="       On       " style="height:100px;font-size:14pt;float:left;" />
             </form>
             <form action="./Off">
-            <input type="submit" value="Off" />
+            <input type="submit" value="       Off       " style="height:100px;font-size:14pt;" />
             </form>
-            <p>Device is currently {str(is_enabled)} for {int(formatted_time[3])} hours, {int(formatted_time[4])}
-            minutes, and {int(formatted_time[5])} seconds.</p>
+            <p>Device is currently {status}.</p>
             </body>
             </html>
             """
@@ -117,7 +105,7 @@ def serve(connection, target_ip):
             # Reset first_enable status when enabled for first time
             first_enable = False
         else:
-            html = page("off")
+            html = page("off", -1)
 
             # Reset first_enable status when device powers off
             first_enable = True
