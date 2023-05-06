@@ -91,6 +91,9 @@ def serve(connection, target_ip, wol_socket):
                         send_status = "Can not wake/kill when device is already in that state."
                 else:
                     send_status = "Incorrect Password."
+            else:
+                # It is a get request
+                pass
         except IndexError:
             pass
 
