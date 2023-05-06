@@ -1,21 +1,31 @@
-<!DOCTYPE html>
-<html lang="en-us">
-<head>
+<!doctypehtml>
+    <html lang=en-us>
     <title>Wake on LAN Forwarder</title>
-</head>
+    <style>
+        form {
+            height: 50vh;
+            width: 100%;
+            overflow: auto
+        }
 
-<body>
-<h2>Wake on LAN Forwarder.</h2>
+        div {
+            display: flex;
+            flex-direction: row
+        }
 
-<!--Establish the form buttons On and Off-->
-<form action="./On">
-    <input type="submit" value="       On       " style="height:100px;font-size:14pt;float:left;"/>
-</form>
+        button {
+            font-size: 2rem;
+            height: 100%;
+            width: 100%
+        }
 
-<form action="./Off">
-    <input type="submit" value="       Off       " style="height:100px;font-size:14pt;"/>
-</form>
-
-<p>Device is currently {0}.</p>
-</body>
-</html>
+        p {
+            font-size: 2rem
+        }
+    </style>
+    <h2>Wake on LAN Forwarder.</h2>
+    <div>
+        <form action=./On><button type=submit value=On>On</button></form>
+        <form action=./Off><button type=submit value=Off>Off</button></form>
+    </div>
+    <p>Device is currently {0}.
