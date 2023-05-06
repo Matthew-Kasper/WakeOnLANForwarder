@@ -50,25 +50,50 @@ def serve(connection, target_ip, wol_socket):
     first_enable_timestamp = -1
 
     while True:
+        # Initialize a status to send
+        send_status = ""
+
+        # Find and cache the device_status
+        device_on = device_manager.get_status(target_ip)
+
         # Accept client connection and reads request
         client = connection.accept()[0]
-        request = client.recv(1024)
-        request = str(request)
+        request = str(client.recv(1024))
 
         try:
             # Isolate part of request with form information
-            request = request.split()[1]
+            request_list = request.split()
+
+            if request_list[0] == "b'POST":
+                # Set default password
+                password = ""
+
+                raw_form_data = request_list[len(request_list) - 1]
+                # Find password
+                password_index_start = raw_form_data.find("password=")
+                password_index_end = raw_form_data.find("&")
+
+                # Check to see if password start and end markers exist
+                if password_index_start != -1 and password_index_end != -1:
+                    password = raw_form_data[password_index_start + len("password="):password_index_end]
+
+                # Check if password is correct
+                if password == credentials_cache.get_operation_password():
+                    if raw_form_data.find("On") != -1 and not device_on:
+                        # If button On was pressed
+                        device_manager.wake(wol_socket)
+                        send_status = "Successfully sent Wake-On-Lan packet to device."
+                    elif raw_form_data.find("Off") != -1 and device_on:
+                        # If button Off was pressed
+                        device_manager.kill("Stub")
+                        send_status = "Successfully sent Kill-On-Lan packet to device."
+                else:
+                    send_status = "Incorrect Password."
         except IndexError:
             pass
 
-        # Check for what button was pressed and if the server can be turned on/off
-        if request == '/On?' and not device_manager.get_status(target_ip):
-            device_manager.wake(wol_socket)
-        elif request == '/Off?' and device_manager.get_status(target_ip):
-            device_manager.kill("stub")
-
         # Generate and send new html page
-        if device_manager.get_status(target_ip):
+        if device_on:
             if first_enable:
                 # Reset time of first enable
                 first_enable_timestamp = utime.time()
@@ -76,12 +101,12 @@ def serve(connection, target_ip, wol_socket):
             # Find device runtime
             device_runtime = utime.time() - first_enable_timestamp
 
-            html = html_cache.get_html("on", device_runtime)
+            html = html_cache.get_html("on", device_runtime, send_status)
 
             # Reset first_enable status when enabled for first time
             first_enable = False
         else:
-            html = html_cache.get_html("off", -1)
+            html = html_cache.get_html("off", -1, send_status)
 
             # Reset first_enable status when device powers off
             first_enable = True
