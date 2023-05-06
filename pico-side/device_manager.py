@@ -1,5 +1,3 @@
-import os
-
 import uping
 
 def get_target_ip():
@@ -19,5 +17,8 @@ def get_status(ip):
     return response[0] == response[1]
 
 def wake(ip):
-
+    # Stub
+    print("wake")
 def kill(ip):
+    # Stub
+    print("kill")
