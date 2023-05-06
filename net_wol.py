@@ -1,6 +1,7 @@
 import socket
 
 import network
+import utime
 
 import device_manager
 import status_light
@@ -23,24 +24,45 @@ def connect():
 
     return str(wlan.ifconfig()[0])
 
-# Generates html page to be sent
-def page(status):
+def page(is_enabled):
     html = f"""
             <!DOCTYPE html>
             <html>
             <body>
-            <p>Wake on LAN Forwarder.</p>
+            <h2>Wake on LAN Forwarder.</h2>
             <form action="./On">
             <input type="submit" value="On " />
             </form>
             <form action="./Off">
             <input type="submit" value="Off" />
             </form>
-            <p>Device is currently {str(status)}.</p>
+            <p>Device is currently {str(is_enabled)}.</p>
             </body>
             </html>
             """
 
+    return html
+
+# Generates html page to be sent.
+def page(is_enabled, runtime):
+    formatted_time = utime.localtime(runtime)
+
+    html = f"""
+            <!DOCTYPE html>
+            <html>
+            <body>
+            <h2>Wake on LAN Forwarder.</h2>
+            <form action="./On">
+            <input type="submit" value="On " />
+            </form>
+            <form action="./Off">
+            <input type="submit" value="Off" />
+            </form>
+            <p>Device is currently {str(is_enabled)} for {int(formatted_time[3])} hours, {int(formatted_time[4])}
+            minutes, and {int(formatted_time[5])} seconds.</p>
+            </body>
+            </html>
+            """
     return html
 
 # Opens socket to listen for http requests
@@ -58,6 +80,11 @@ def listen(ip):
 
 # Checks if an html form button was pressed and updates the html page
 def serve(connection, target_ip):
+
+    # Initialize system timer variables
+    first_enable = True
+    first_enable_timestamp = -1
+
     while True:
         # Accept client connection and reads request
         client = connection.accept()[0]
@@ -78,9 +105,22 @@ def serve(connection, target_ip):
 
         # Generate and send new html page
         if device_manager.get_status(target_ip):
-            html = page("on")
+            if first_enable:
+                # Reset time of first enable
+                first_enable_timestamp = utime.time()
+
+            # Find device runtime
+            device_runtime = utime.time() - first_enable_timestamp
+
+            html = page("on", device_runtime)
+
+            # Reset first_enable status when enabled for first time
+            first_enable = False
         else:
             html = page("off")
+
+            # Reset first_enable status when device powers off
+            first_enable = True
 
         client.send(html)
         client.close()
