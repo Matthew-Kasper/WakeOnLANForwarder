@@ -5,12 +5,12 @@ import utime
 
 import credentials_cache
 import device_manager
+import html_cache
 import status_light
 
 
 # Connects to local network, returns IPv4 of device
 def connect():
-
     # Takes first and second line of credentials file and takes the ssid and password from them
     ssid = credentials_cache.get_ssid()
     password = credentials_cache.get_inet_password()
@@ -22,38 +22,9 @@ def connect():
 
     return str(wlan.ifconfig()[0])
 
-# Generates html page to be sent.
-def page(is_enabled, runtime):
-
-    if(runtime == -1):
-        # Do not display runtime
-        status = str(is_enabled)
-    else:
-        # Display runtime
-        formatted_time = utime.localtime(runtime)
-        status = f"{str(is_enabled)} for {int(formatted_time[3])} hours, {int(formatted_time[4])} minutes, and {int(formatted_time[5])} seconds."
-
-
-    html = f"""
-            <!DOCTYPE html>
-            <html>
-            <body>
-            <h2>Wake on LAN Forwarder.</h2>
-            <form action="./On">
-            <input type="submit" value="       On       " style="height:100px;font-size:14pt;float:left;" />
-            </form>
-            <form action="./Off">
-            <input type="submit" value="       Off       " style="height:100px;font-size:14pt;" />
-            </form>
-            <p>Device is currently {status}.</p>
-            </body>
-            </html>
-            """
-    return html
 
 # Opens socket to listen for http requests
 def listen(ip):
-
     # Format address
     address = (ip, 80)
 
@@ -62,7 +33,8 @@ def listen(ip):
     connection.bind(address)
     connection.listen(1)
 
-    return(connection)
+    return (connection)
+
 
 # Creates broadcast socket to be used for sending wake-on-lan packets
 def establish_wol_socket():
@@ -70,9 +42,9 @@ def establish_wol_socket():
 
     return wol_socket
 
+
 # Checks if an html form button was pressed and updates the html page
 def serve(connection, target_ip, wol_socket):
-
     # Initialize system timer variables
     first_enable = True
     first_enable_timestamp = -1
@@ -104,12 +76,12 @@ def serve(connection, target_ip, wol_socket):
             # Find device runtime
             device_runtime = utime.time() - first_enable_timestamp
 
-            html = page("on", device_runtime)
+            html = html_cache.get_html("on", device_runtime)
 
             # Reset first_enable status when enabled for first time
             first_enable = False
         else:
-            html = page("off", -1)
+            html = html_cache.get_html("off", -1)
 
             # Reset first_enable status when device powers off
             first_enable = True
