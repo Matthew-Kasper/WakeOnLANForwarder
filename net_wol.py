@@ -20,6 +20,11 @@ def connect():
     wlan.active(True)
     wlan.connect(str(ssid), str(password))
 
+    # Make sure that it gets connected to the network
+    while not wlan.isconnected():
+        utime.sleep(1)
+        status_light.send_blinks(1)
+
     return str(wlan.ifconfig()[0])
 
 
@@ -50,15 +55,16 @@ def serve(connection, target_ip, wol_socket):
     first_enable_timestamp = -1
 
     while True:
+
+        # Accept client connection and reads request
+        client = connection.accept()[0]
+        request = str(client.recv(1024))
+
         # Initialize a status to send
         send_status = ""
 
         # Find and cache the device_status
         device_on = device_manager.get_status(target_ip)
-
-        # Accept client connection and reads request
-        client = connection.accept()[0]
-        request = str(client.recv(1024))
 
         try:
             # Isolate part of request with form information
