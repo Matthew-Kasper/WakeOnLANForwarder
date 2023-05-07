@@ -16,4 +16,4 @@ def get_html(is_enabled, runtime, send_status):
         device_status = f"{str(is_enabled)} for {int(formatted_time[3])} hours, {int(formatted_time[4])} minutes, and {int(formatted_time[5])} seconds."
 
     html = html_base.format(send_status, device_status)
-    return html
+    return f"HTTP/1.1 200\r\nContent-Type: text/html\r\n\r\n{html}\n"
