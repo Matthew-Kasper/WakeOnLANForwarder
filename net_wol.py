@@ -49,7 +49,7 @@ def establish_wol_socket():
 
 
 # Checks if an html form button was pressed and updates the html page
-def serve(connection, target_ip, wol_socket):
+def serve(connection, wol_socket):
     # Initialize system timer variables
     first_enable = True
     first_enable_timestamp = -1
@@ -64,7 +64,7 @@ def serve(connection, target_ip, wol_socket):
         send_status = ""
 
         # Find and cache the device_status
-        device_on = device_manager.get_status(target_ip)
+        device_on = device_manager.get_status(credentials_cache.get_target_ip())
 
         try:
             # Isolate part of request with form information

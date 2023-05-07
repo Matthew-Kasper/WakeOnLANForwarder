@@ -1,4 +1,3 @@
-import device_manager
 import net_wol
 import status_light
 
@@ -16,4 +15,4 @@ wol_socket = net_wol.establish_wol_socket()
 status_light.send_blinks(2)
 
 # Accept client requests
-net_wol.serve(connection, device_manager.get_target_ip(), wol_socket)
+net_wol.serve(connection, wol_socket)

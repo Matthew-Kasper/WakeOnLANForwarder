@@ -2,10 +2,6 @@ import credentials_cache
 import uping
 
 
-def get_target_ip():
-    return credentials_cache.get_target_ip()
-
-
 def get_status(ip):
     response = uping.ping(ip, count=2, timeout=500, quiet=True)
 
