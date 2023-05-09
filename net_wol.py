@@ -97,6 +97,7 @@ def serve(connection, wol_socket):
                         send_status = "Can not wake/kill when device is already in that state."
                 else:
                     send_status = "Incorrect Password."
+
             else:
                 # It is a get request
                 pass
@@ -123,6 +124,10 @@ def serve(connection, wol_socket):
             first_enable = True
 
         client.send(html)
+        
+        # Wait for html to be finished sending
+        utime.sleep(1)
+
         client.close()
 
         # Send status that request was fulfilled

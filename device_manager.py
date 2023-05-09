@@ -3,7 +3,7 @@ import uping
 
 
 def get_status(ip):
-    response = uping.ping(ip, count=2, timeout=500, quiet=True)
+    response = uping.ping(ip, count=2, timeout=50, quiet=True)
 
     # Return true if all packets arrived successfully
     return response[0] == response[1]
