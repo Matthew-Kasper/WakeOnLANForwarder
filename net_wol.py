@@ -37,7 +37,7 @@ def listen(ip):
     connection = socket.socket()
 
     # Make sure that a connection can not block
-    connection.settimeout(10)
+    connection.settimeout(60)
 
     connection.bind(address)
     connection.listen(1)
@@ -59,11 +59,15 @@ def serve(connection, wol_socket):
     first_enable_timestamp = -1
 
     while True:
+
         try:
             # Accept client connection and reads request
             client = connection.accept()[0]
         except OSError:
-            # If the client gets stuck`waiting on an invalid request
+            # Refreshes the listener on the timeout interval to clear invalid requests
+
+            # Update device up-timer between listening refreshes
+            device_manager.get_status(credentials_cache.get_target_ip())
             continue
 
         try:
