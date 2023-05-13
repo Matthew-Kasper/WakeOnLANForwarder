@@ -35,6 +35,10 @@ def listen(ip):
 
     # Bind and listen on port for http requests
     connection = socket.socket()
+
+    # Make sure that a connection can not block
+    connection.settimeout(10)
+
     connection.bind(address)
     connection.listen(1)
 
@@ -55,10 +59,20 @@ def serve(connection, wol_socket):
     first_enable_timestamp = -1
 
     while True:
+        try:
+            # Accept client connection and reads request
+            client = connection.accept()[0]
+        except OSError:
+            # If the client gets stuck`waiting on an invalid request
+            continue
 
-        # Accept client connection and reads request
-        client = connection.accept()[0]
-        request = str(client.recv(1024))
+        try:
+            request = str(client.recv(1024))
+        except OSError:
+            # If request could not be parsed, close connection and continue from top
+            status_light.send_blinks(1)
+            client.close()
+            continue
 
         # Initialize a status to send
         send_status = ""
@@ -95,8 +109,10 @@ def serve(connection, wol_socket):
                         send_status = "Successfully sent Kill-On-Lan packet to device."
                     else:
                         send_status = "Can not wake/kill when device is already in that state."
+                        pass
                 else:
                     send_status = "Incorrect Password."
+                    pass
 
             else:
                 # It is a get request
@@ -124,11 +140,11 @@ def serve(connection, wol_socket):
             first_enable = True
 
         client.send(html)
-        
+
         # Wait for html to be finished sending
         utime.sleep(1)
 
         client.close()
 
         # Send status that request was fulfilled
-        status_light.send_blinks(3)
+        status_light.send_blinks(2)
