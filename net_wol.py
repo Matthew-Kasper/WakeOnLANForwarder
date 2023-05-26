@@ -77,13 +77,14 @@ def serve(connection, wol_socket):
 
             # Update device up-timer between listening refreshes
             device_manager.get_status(credentials_cache.get_target_ip())
+            status_light.send_blinks(1)
             continue
 
         try:
             request = str(client.recv(1024))
         except OSError:
             # If request could not be parsed, close connection and continue from top
-            status_light.send_blinks(1)
+            status_light.send_blinks(2)
             client.close()
             continue
 
@@ -160,4 +161,4 @@ def serve(connection, wol_socket):
         client.close()
 
         # Send status that request was fulfilled
-        status_light.send_blinks(2)
+        status_light.send_blinks(3)
