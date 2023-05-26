@@ -59,6 +59,15 @@ def serve(connection, wol_socket):
     first_enable_timestamp = -1
 
     while True:
+        # Check every refresh loop if the device has been enabled and log start-time
+        device_on = device_manager.get_status(credentials_cache.get_target_ip())
+
+        if (device_on):
+            if first_enable:
+                first_enable_timestamp = utime.time()
+            first_enable = False
+        else:
+            first_enable = True
 
         try:
             # Accept client connection and reads request
