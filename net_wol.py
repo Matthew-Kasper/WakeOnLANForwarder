@@ -6,6 +6,7 @@ import utime
 import credentials_cache
 import device_manager
 import html_cache
+import http_utils
 import status_light
 
 
@@ -88,51 +89,16 @@ def serve(connection, wol_socket):
             client.close()
             continue
 
-        # Initialize a status to send
-        send_status = ""
+        send_status, post_body_found = http_utils.parse_post(request, wol_socket, override_post_check=False)
 
-        # Find and cache the device_status
-        device_on = device_manager.get_status(credentials_cache.get_target_ip())
+        # If password fields could not be found, body was not send along with the header, need to receive again
+        if not post_body_found:
+            status_light.send_blinks(1)
+            # Receive body
+            request = str(client.recv(1024))
 
-        try:
-            # Isolate part of request with form information
-            request_list = request.split()
-
-            if request_list[0] == "b'POST":
-                # Set default password
-                password = ""
-
-                raw_form_data = request_list[len(request_list) - 1]
-                # Find password
-                password_index_start = raw_form_data.find("password=")
-                password_index_end = raw_form_data.find("&")
-
-                # Check to see if password start and end markers exist
-                if password_index_start != -1 and password_index_end != -1:
-                    password = raw_form_data[password_index_start + len("password="):password_index_end]
-
-                # Check if password is correct
-                if password == credentials_cache.get_operation_password():
-                    if raw_form_data.find("On") != -1 and not device_on:
-                        # If button On was pressed
-                        device_manager.wake(wol_socket)
-                        send_status = "Successfully sent Wake-On-Lan packet to device."
-                    elif raw_form_data.find("Off") != -1 and device_on:
-                        # If button Off was pressed
-                        device_manager.kill("Stub")
-                        send_status = "Successfully sent Kill-On-Lan packet to device."
-                    else:
-                        send_status = "Can not wake/kill when device is already in that state."
-                        pass
-                else:
-                    send_status = "Incorrect Password."
-                    pass
-
-            else:
-                # It is a get request
-                pass
-        except IndexError:
-            pass
+            # Retry process, but if it fails do not try again
+            send_status = http_utils.parse_post(request, wol_socket, override_post_check=True)[0]
 
         # Generate and send new html page
         if device_on:
