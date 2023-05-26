@@ -37,7 +37,7 @@ def listen(ip):
     connection = socket.socket()
 
     # Make sure that a connection can not block
-    connection.settimeout(60)
+    connection.settimeout(30)
 
     connection.bind(address)
     connection.listen(1)
