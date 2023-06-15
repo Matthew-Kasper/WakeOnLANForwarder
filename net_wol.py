@@ -59,11 +59,14 @@ def establish_wol_socket():
 
 # Checks if an html form button was pressed and updates the html page
 def serve(connection, wol_socket):
+    # Initialize reference to network interface to check if connected to network
+    wlan = network.WLAN(network.STA_IF)
+
     # Initialize system timer variables
     first_enable = True
     first_enable_timestamp = -1
 
-    while True:
+    while wlan.isconnected():
         # Check every refresh loop if the device has been enabled and log start-time
         device_on = device_manager.get_status(credentials_cache.get_target_ip())
 
