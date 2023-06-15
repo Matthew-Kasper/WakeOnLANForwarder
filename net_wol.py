@@ -18,6 +18,10 @@ def connect():
 
     # Connect to the network using ssid and password
     wlan = network.WLAN(network.STA_IF)
+
+    # Disable power save
+    wlan.config(pm=0xa11140)
+
     wlan.active(True)
     wlan.connect(str(ssid), str(password))
 
