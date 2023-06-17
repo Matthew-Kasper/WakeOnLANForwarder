@@ -5,8 +5,8 @@ import uping
 def get_status(ip):
     response = uping.ping(ip, count=4, timeout=1000, quiet=True)
 
-    # Return true if all packets arrived successfully
-    return response[0] == response[1]
+    # Return true if 1 or more packets are responded to
+    return response[1] > 0
 
 
 def wake(wol_socket):
