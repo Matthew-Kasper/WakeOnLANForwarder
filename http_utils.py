@@ -28,7 +28,7 @@ def parse_post(request, wol_socket, override_post_check):
             # If start of password exists, find ending position
             if (password_index_start != -1):
                 # Try and find end of password data starting from the password starting position
-                password_index_end = request[password_index_start:].find(r"\r\n") + password_index_start
+                password_index_end = request[password_index_start:].find("&") + password_index_start
 
             # Check to see if password start and end markers exist
             if password_index_start != -1 and password_index_end != -1:
