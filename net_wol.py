@@ -101,8 +101,14 @@ def serve(connection, wol_socket):
         # If password fields could not be found, body was not send along with the header, need to receive again
         if not post_body_found:
             status_light.send_blinks(1)
-            # Receive body
-            request = str(client.recv(1024))
+            try:
+                # Receive body
+                request = str(client.recv(1024))
+            except OSError:
+                # Error in accepting request
+                status_light.send_blinks(2)
+                client.close()
+                continue
 
             # Retry process, but if it fails do not try again
             send_status = http_utils.parse_post(request, wol_socket, override_post_check=True)[0]
