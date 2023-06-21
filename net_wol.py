@@ -132,7 +132,13 @@ def serve(connection, wol_socket):
             # Reset first_enable status when device powers off
             first_enable = True
 
-        client.send(html)
+        try:
+            client.send(html)
+        except OSError:
+            # Error in sending request
+            status_light.send_blinks(2)
+            client.close()
+            continue
 
         # Wait for html to be finished sending
         utime.sleep(1)
